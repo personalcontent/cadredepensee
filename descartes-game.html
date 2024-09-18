@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu des Concepts Cartésiens</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .question {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .options button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #4a4a4a; /* Gris foncé */
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .options button:hover {
+            background-color: #333333; /* Gris plus foncé au survol */
+        }
+        .options button:disabled {
+            background-color: #888888; /* Gris clair pour les boutons désactivés */
+            cursor: not-allowed;
+        }
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .correct {
+            color: #2ecc71; /* Vert */
+        }
+        .incorrect {
+            color: #e74c3c; /* Rouge */
+        }
+        #next-btn, #reset-btn {
+            background-color: #2c3e50; /* Bleu foncé */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            display: none;
+            margin-top: 10px;
+        }
+        #next-btn:hover, #reset-btn:hover {
+            background-color: #34495e; /* Bleu un peu plus clair au survol */
+        }
+        #score {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Jeu des Concepts Cartésiens</h1>
+        <div id="question-container">
+            <p id="concept-title" class="question"></p>
+            <p id="question-text"></p>
+            <div id="options" class="options"></div>
+        </div>
+        <div id="feedback" class="feedback"></div>
+        <button id="next-btn">Concept suivant</button>
+        <button id="reset-btn">Rejouer</button>
+        <div id="score"></div>
+    </div>
+
+    <script>
+        // Le script JavaScript reste inchangé
+        const concepts = [
+            {
+                title: "Le doute méthodique",
+                question: "Quelle est l'idée principale du doute méthodique ?",
+                options: [
+                    "Douter de tout pour atteindre une vérité certaine",
+                    "Ne jamais remettre en question ses croyances",
+                    "Accepter tout ce qu'on nous dit comme vrai"
+                ],
+                correctAnswer: 0
+            },
+            {
+                title: "Cogito ergo sum",
+                question: "Que signifie 'Je pense, donc je suis' ?",
+                options: [
+                    "L'existence dépend de la pensée d'autrui",
+                    "L'acte de penser prouve notre propre existence",
+                    "Seuls les philosophes existent vraiment"
+                ],
+                correctAnswer: 1
+            },
+            {
+                title: "Le dualisme corps-esprit",
+                question: "Que propose le dualisme corps-esprit de Descartes ?",
+                options: [
+                    "Le corps et l'esprit sont identiques",
+                    "Seul le corps existe réellement",
+                    "Le corps et l'esprit sont de nature différente"
+                ],
+                correctAnswer: 2
+            },
+            {
+                title: "Les idées innées",
+                question: "Que sont les idées innées selon Descartes ?",
+                options: [
+                    "Des idées acquises par l'expérience",
+                    "Des idées présentes dès la naissance",
+                    "Des idées imposées par la société"
+                ],
+                correctAnswer: 1
+            },
+            {
+                title: "La méthode cartésienne",
+                question: "Quel est le principe de base de la méthode cartésienne ?",
+                options: [
+                    "Résoudre les problèmes par intuition",
+                    "Diviser les problèmes complexes en étapes simples",
+                    "Toujours accepter la première solution trouvée"
+                ],
+                correctAnswer: 1
+            }
+        ];
+
+        let currentConcept = 0;
+        let score = 0;
+
+        const conceptTitle = document.getElementById('concept-title');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options');
+        const feedbackElement = document.getElementById('feedback');
+        const nextButton = document.getElementById('next-btn');
+        const resetButton = document.getElementById('reset-btn');
+        const scoreElement = document.getElementById('score');
+
+        function loadQuestion() {
+            const concept = concepts[currentConcept];
+            conceptTitle.textContent = concept.title;
+            questionText.textContent = concept.question;
+            optionsContainer.innerHTML = '';
+            concept.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.addEventListener('click', () => selectAnswer(index));
+                optionsContainer.appendChild(button);
+            });
+            feedbackElement.textContent = '';
+            nextButton.style.display = 'none';
+        }
+
+        function selectAnswer(index) {
+            const concept = concepts[currentConcept];
+            const buttons = optionsContainer.getElementsByTagName('button');
+            for (let button of buttons) {
+                button.disabled = true;
+            }
+            if (index === concept.correctAnswer) {
+                feedbackElement.textContent = 'Correct !';
+                feedbackElement.className = 'feedback correct';
+                score++;
+            } else {
+                feedbackElement.textContent = `Incorrect. La bonne réponse était : ${concept.options[concept.correctAnswer]}`;
+                feedbackElement.className = 'feedback incorrect';
+            }
+            if (currentConcept < concepts.length - 1) {
+                nextButton.style.display = 'block';
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function nextQuestion() {
+            currentConcept++;
+            if (currentConcept < concepts.length) {
+                loadQuestion();
+            } else {
+                showFinalScore();
+            }
+        }
+
+        function showFinalScore() {
+            questionText.textContent = 'Jeu terminé !';
+            optionsContainer.innerHTML = '';
+            feedbackElement.textContent = '';
+            nextButton.style.display = 'none';
+            resetButton.style.display = 'block';
+            scoreElement.textContent = `Votre score final : ${score}/${concepts.length}`;
+        }
+
+        function resetGame() {
+            currentConcept = 0;
+            score = 0;
+            loadQuestion();
+            resetButton.style.display = 'none';
+            scoreElement.textContent = '';
+        }
+
+        nextButton.addEventListener('click', nextQuestion);
+        resetButton.addEventListener('click', resetGame);
+
+        loadQuestion();
+    </script>
+</body>
+</html>
